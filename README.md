@@ -1,161 +1,43 @@
-# vibe-coding
+## :warning: Please read these instructions carefully and entirely first
+* Clone this repository to your local machine.
+* Use your IDE of choice to complete the assignment.
+* When you have completed the assignment, you need to  push your code to this repository and [mark the assignment as completed by clicking here]({{submission_link}}).
+* Once you mark it as completed, your access to this repository will be revoked. Please make sure that you have completed the assignment and pushed all code from your local machine to this repository before you click the link.
 
-# vibe-coding
+## Operability Take-Home Exercise
 
-A simple Flask-based web API to fetch and display public GitHub gists for any user.  
-This project includes CI/CD automation with Jenkins, Docker containerization, and Microsoft Teams notifications.
+Welcome to the start of our recruitment process for Operability Engineers. It was great to speak to you regarding an opportunity to join the Equal Experts network!
 
----
+Please write code to deliver a solution to the problems outlined below.
 
-## Features
+We appreciate that your time is valuable and do not expect this exercise to **take more than 90 minutes**. If you think this exercise will take longer than that, I **strongly** encourage you to please get in touch to ask any clarifying questions.
 
-- **Flask API**: Exposes endpoints to fetch GitHub gists for a given username.
-- **Dockerized**: Easily build and run the app in a container.
-- **Automated Testing**: Uses `pytest` for unit tests.
-- **CI/CD**: Jenkins pipeline for build, test, Docker image creation, and Teams notifications.
+### Submission guidelines
+**Do**
+- Provide a README file in text or markdown format that documents a concise way to set up and run the provided solution.
+- Take the time to read any applicable API or service docs, it may save you significant effort.
+- Make your solution simple and clear. We aren't looking for overly complex ways to solve the problem since in our experience, simple and clear solutions to problems are generally the most maintainable and extensible solutions.
 
----
+**Don't**
 
-## Project Structure
+Expect the reviewer to dedicate a machine to review the test by:
 
-```
-vibe-coding/
-├── app.py                # Flask app entry point
-├── requirements.txt      # Python dependencies
-├── Dockerfile            # Container build instructions
-├── Jenkinsfile           # CI/CD pipeline definition
-├── webserver/
-│   └── server.py         # Flask Blueprint for gist API
-├── test/
-│   └── test_app.py       # Example unit tests
-└── README.md             # Project documentation
-```
+- Installing software globally that may conflict with system software
+- Requiring changes to system-wide configurations
+- Providing overly complex solutions that need to spin up a ton of unneeded supporting dependencies. We aspire to keep our dev experiences as simple as possible (but no simpler)!
+- Include identifying information in your submission. We are endeavouring to make our review process anonymous to reduce bias.
 
----
+### Exercise
+If you have any questions on the below exercise, please do get in touch and we’ll answer as soon as possible.
 
-## Usage
+#### Build an API, test it, and package it into a container
+- Build a simple HTTP web server API in any general-purpose programming language[^1] that interacts with the GitHub API and responds to requests on `/<USER>` with a list of the user’s publicly available Gists[^2].
+- Create an automated test to validate that your web server API works. An example user to use as test data is `octocat`.
+- Package the web server API into a docker container that listens for requests on port `8080`. You do not need to publish the resulting container image in any container registry, but we are expecting the Dockerfile in the submission.
+- The solution may optionally provide other functionality (e.g. pagination, caching) but the above **must** be implemented.
 
-### 1. Local Development
-
-**Install dependencies:**
-```sh
-pip install --no-cache-dir -r requirements.txt
-```
-
-**Run the app:**
-```sh
-python app.py
-```
-The API will be available at [http://localhost:8080](http://localhost:8080).
-
-**Example API call:**
-```
-GET /<username>
-```
-Returns a list of public gists for the specified GitHub user.
-
----
-
-### 2. Running Tests
-
-```sh
-pytest --maxfail=1 --disable-warnings -q
-```
-
----
-
-### 3. Docker
-
-**Build the Docker image:**
-```sh
-docker build -t flask-gist-app .
-```
-
-**Run the container:**
-```sh
-docker run -p 8080:8080 flask-gist-app
-```
-
----
-
-### 4. CI/CD with Jenkins
-
-- The `Jenkinsfile` defines stages for checkout, install & test, Docker build, and Teams notifications.
-- **Teams notifications**: Add your Teams webhook URL as a Jenkins secret text credential with the ID `teams-webhook-url`.
-
-**Pipeline stages:**
-- Checkout code from GitHub
-- Install dependencies and run tests
-- Build Docker image
-- Notify Microsoft Teams on success or failure
-
----
-
-## Example Code
-
-**app.py**
-```python
-from flask import Flask
-from webserver.server import gist_api
-
-app = Flask(__name__)
-app.register_blueprint(gist_api)
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-```
-
-**webserver/server.py**
-```python
-from flask import Blueprint, jsonify
-import requests
-
-gist_api = Blueprint("gist_api", __name__)
-
-@gist_api.route("/<username>", methods=["GET"])
-def get_gists(username):
-    url = f"https://api.github.com/users/{username}/gists"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return jsonify({"error": "User not found or GitHub API error"}), 404
-
-    gists = [
-        {
-            "id": gist["id"],
-            "description": gist["description"],
-            "url": gist["html_url"]
-        }
-        for gist in response.json()
-    ]
-    return jsonify(gists)
-```
-
----
-
-## Requirements
-
-- Python 3.11+
-- Flask
-- requests
-- pytest (for testing)
-- Docker (for containerization)
-- Jenkins (for CI/CD)
-
----
-
-## Teams Webhook Setup for Jenkins
-
-1. In Microsoft Teams, create an **Incoming Webhook** connector and copy the URL.
-2. In Jenkins, go to **Manage Jenkins → Manage Credentials**.
-3. Add a new **Secret text** credential:
-   - **Secret:** (paste your Teams webhook URL)
-   - **ID:** `teams-webhook-url`
-4. The Jenkins pipeline will use this credential for notifications.
-
----
-
-## License
-
-MIT License
-
----
+Best of luck,  
+Equal Experts
+__________________________________________
+[^1]: For example Go, Python or Ruby but not Bash or Powershell.  
+[^2]: https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28
