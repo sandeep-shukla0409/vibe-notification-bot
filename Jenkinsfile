@@ -59,3 +59,6 @@ pipeline {
         """
         sh "curl -H 'Content-Type: application/json' -d '${payload.trim()}' $TEAMS_WEBHOOK"
       }
+    }
+  }
+}
