@@ -5,6 +5,8 @@ pipeline {
         IMAGE_NAME = 'vibe-notification-bot'
         TAG = "${env.BUILD_NUMBER}"
         CONTAINER_NAME = 'vibe-notification-bot'
+        CONTAINER_PORT=8080
+        HOST_PORT=9090
     }
 
     stages {
@@ -23,9 +25,7 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 bat """
-                    docker stop ${CONTAINER_NAME}
-                    docker rm ${CONTAINER_NAME}
-                    docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_NAME}:${TAG}
+                    docker run -d --name ${CONTAINER_NAME} -p ${HOST_PORT}:${CONTAINER_PORT} ${IMAGE_NAME}:${TAG}
                 """
             }
         }
