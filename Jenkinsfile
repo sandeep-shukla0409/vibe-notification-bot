@@ -8,42 +8,26 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${IMAGE_NAME}:${TAG}")
-                }
+                bat "docker build -t ${IMAGE_NAME}:${TAG} ."
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh "docker run --rm ${IMAGE_NAME} pytest test/"
+                bat "docker run --rm ${IMAGE_NAME}:${TAG} pytest test/"
             }
         }
 
         stage('Deploy Container') {
             steps {
-                sh """
-                    docker rm -f ${CONTAINER_NAME} || true
-                    docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_NAME}
+                bat """
+                    docker stop ${CONTAINER_NAME}
+                    docker rm ${CONTAINER_NAME}
+                    docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_NAME}:${TAG}
                 """
             }
-        }
-    }
-
-    post {
-        success {
-            echo "✅ App deployed locally. Access it at http://localhost:5000"
-        }
-        failure {
-            echo "❌ Something went wrong. Check the logs."
         }
     }
 }
