@@ -1,0 +1,53 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environments
+venv/
+env/
+ENV/
+*.env
+
+# Docker artifacts
+*.tar
+*.pid
+*.sock
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.swp
+
+# Test outputs
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# Node (if using frontend or GraphQL playground)
+node_modules/
+npm-debug.log*
+
+# Ignore secrets
+secrets.json
+*.pem
+*.key
+
+# Ignore container volumes (if mounted locally)
+volumes/
