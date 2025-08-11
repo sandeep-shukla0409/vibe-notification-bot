@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibe-notification-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vibe-notification-bot
+  template:
+    metadata:
+      labels:
+        app: vibe-notification-bot
+    spec:
+      containers:
+        - name: vibe-notification-bot
+          image: vibe-notification-bot:latest # Change 'latest' to your desired tag if needed
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vibe-notification-bot-service
+spec:
+  type: NodePort
+  selector:
+    app: vibe-notification-bot
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 8080
+      nodePort: 30090 # Optional: specify
+      
