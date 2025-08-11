@@ -18,6 +18,8 @@ COPY test/ test/
 EXPOSE 8080
 
 RUN useradd -m appuser
+RUN chown -R appuser:appuser /app
+
 USER appuser
 
 # Run the app

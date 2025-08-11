@@ -8,21 +8,31 @@ pipeline {
     }
 
     stages {
-        stage('Run Unit Tests') {
+        stage('Build Dev Image') {
             steps {
-                echo "🧪 Running unit tests before image build..."
-                sh "pytest test/unit"
+                echo "🔧 Building DEV image..."
+                bat """
+                    docker build -t %IMAGE_NAME%:dev .
+                """
             }
         }
 
-        stage('Build & Push Dev Image') {
+        stage('Run Tests in Dev Container') {
+            steps {
+                echo "🧪 Running tests inside container..."
+                bat """
+                    docker run --rm %IMAGE_NAME%:dev pytest test/ --cache-clear
+                """
+            }
+        }
+
+        stage('Push Dev Image') {
             when { branch 'develop' }
             steps {
-                echo "🔧 Building and pushing DEV image..."
-                sh """
-                    docker build -t ${IMAGE_NAME}:dev .
-                    docker tag ${IMAGE_NAME}:dev ${DOCKER_REPO}/${IMAGE_NAME}:dev
-                    docker push ${DOCKER_REPO}/${IMAGE_NAME}:dev
+                echo "📦 Tagging and pushing DEV image..."
+                bat """
+                    docker tag %IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:dev
+                    docker push %DOCKER_REPO%/%IMAGE_NAME%:dev
                 """
             }
         }
@@ -31,10 +41,10 @@ pipeline {
             when { branch 'test' }
             steps {
                 echo "🚀 Promoting DEV to TEST..."
-                sh """
-                    docker pull ${DOCKER_REPO}/${IMAGE_NAME}:dev
-                    docker tag ${DOCKER_REPO}/${IMAGE_NAME}:dev ${DOCKER_REPO}/${IMAGE_NAME}:test
-                    docker push ${DOCKER_REPO}/${IMAGE_NAME}:test
+                bat """
+                    docker pull %DOCKER_REPO%/%IMAGE_NAME%:dev
+                    docker tag %DOCKER_REPO%/%IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:test
+                    docker push %DOCKER_REPO%/%IMAGE_NAME%:test
                 """
             }
         }
@@ -43,10 +53,10 @@ pipeline {
             when { branch 'main' }
             steps {
                 echo "🚀 Promoting TEST to PROD..."
-                sh """
-                    docker pull ${DOCKER_REPO}/${IMAGE_NAME}:test
-                    docker tag ${DOCKER_REPO}/${IMAGE_NAME}:test ${DOCKER_REPO}/${IMAGE_NAME}:prod
-                    docker push ${DOCKER_REPO}/${IMAGE_NAME}:prod
+                bat """
+                    docker pull %DOCKER_REPO%/%IMAGE_NAME%:test
+                    docker tag %DOCKER_REPO%/%IMAGE_NAME%:test %DOCKER_REPO%/%IMAGE_NAME%:prod
+                    docker push %DOCKER_REPO%/%IMAGE_NAME%:prod
                 """
             }
         }
@@ -62,8 +72,8 @@ pipeline {
 
                     echo "🚀 Deploying ${envTag.toUpperCase()} container on port ${hostPort}..."
 
-                    sh """
-                        docker rm -f ${containerName} || true
+                    bat """
+                        docker rm -f ${containerName}
                         docker run -d --name ${containerName} -p ${hostPort}:${CONTAINER_PORT} ${DOCKER_REPO}/${IMAGE_NAME}:${envTag}
                     """
                 }
