@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'vibe-notification-bot'
-        DOCKER_REPO = 'sandeepshukla0409/localtest' // Your Docker Hub username
+        DOCKER_REPO = 'sandeepshukla0409/localtest' // This is your actual Docker Hub repo
         CONTAINER_PORT = '8080'
     }
 
@@ -40,10 +40,10 @@ pipeline {
         stage('Push Dev Image') {
             when { branch 'develop' }
             steps {
-                echo " 📦 Tagging and pushing DEV image to Docker Hub..."
+                echo "📦 Tagging and pushing DEV image to Docker Hub..."
                 bat """
-                    docker tag %IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:dev
-                    docker push %DOCKER_REPO%/%IMAGE_NAME%:dev
+                    docker tag %IMAGE_NAME%:dev %DOCKER_REPO%:dev
+                    docker push %DOCKER_REPO%:dev
                 """
             }
         }
@@ -53,9 +53,9 @@ pipeline {
             steps {
                 echo "🚀 Promoting DEV to TEST on Docker Hub..."
                 bat """
-                    docker pull %DOCKER_REPO%/%IMAGE_NAME%:dev
-                    docker tag %DOCKER_REPO%/%IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:test
-                    docker push %DOCKER_REPO%/%IMAGE_NAME%:test
+                    docker pull %DOCKER_REPO%:dev
+                    docker tag %DOCKER_REPO%:dev %DOCKER_REPO%:test
+                    docker push %DOCKER_REPO%:test
                 """
             }
         }
@@ -65,9 +65,9 @@ pipeline {
             steps {
                 echo "🚀 Promoting TEST to PROD on Docker Hub..."
                 bat """
-                    docker pull %DOCKER_REPO%/%IMAGE_NAME%:test
-                    docker tag %DOCKER_REPO%/%IMAGE_NAME%:test %DOCKER_REPO%/%IMAGE_NAME%:prod
-                    docker push %DOCKER_REPO%/%IMAGE_NAME%:prod
+                    docker pull %DOCKER_REPO%:test
+                    docker tag %DOCKER_REPO%:test %DOCKER_REPO%:prod
+                    docker push %DOCKER_REPO%:prod
                 """
             }
         }
@@ -85,7 +85,7 @@ pipeline {
 
                     bat """
                         docker rm -f ${containerName}
-                        docker run -d --name ${containerName} -p ${hostPort}:${CONTAINER_PORT} %DOCKER_REPO%/%IMAGE_NAME%:${envTag}
+                        docker run -d --name ${containerName} -p ${hostPort}:${CONTAINER_PORT} %DOCKER_REPO%:${envTag}
                     """
                 }
             }
