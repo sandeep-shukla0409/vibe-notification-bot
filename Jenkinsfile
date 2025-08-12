@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'vibe-notification-bot'
-        DOCKER_REPO = 'sandeepshukla0409' // Your Docker Hub username
+        DOCKER_REPO = 'sandeepshukla0409/localtest' // Your Docker Hub username
         CONTAINER_PORT = '8080'
     }
 
@@ -40,7 +40,7 @@ pipeline {
         stage('Push Dev Image') {
             when { branch 'develop' }
             steps {
-                echo "📦 Tagging and pushing DEV image to Docker Hub..."
+                echo " 📦 Tagging and pushing DEV image to Docker Hub..."
                 bat """
                     docker tag %IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:dev
                     docker push %DOCKER_REPO%/%IMAGE_NAME%:dev
