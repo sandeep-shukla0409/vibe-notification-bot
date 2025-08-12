@@ -3,11 +3,22 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'vibe-notification-bot'
-        DOCKER_REPO = '' // Replace with your Docker registry/repo
+        DOCKER_REPO = 'sandeepshukla0409' // Your Docker Hub username
         CONTAINER_PORT = '8080'
     }
 
     stages {
+        stage('Docker Hub Login') {
+            steps {
+                echo "🔐 Logging in to Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: 'dockerhubcred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat """
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    """
+                }
+            }
+        }
+
         stage('Build Dev Image') {
             steps {
                 echo "🔧 Building DEV image..."
@@ -29,7 +40,7 @@ pipeline {
         stage('Push Dev Image') {
             when { branch 'develop' }
             steps {
-                echo "📦 Tagging and pushing DEV image..."
+                echo "📦 Tagging and pushing DEV image to Docker Hub..."
                 bat """
                     docker tag %IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:dev
                     docker push %DOCKER_REPO%/%IMAGE_NAME%:dev
@@ -40,7 +51,7 @@ pipeline {
         stage('Promote Dev to Test') {
             when { branch 'test' }
             steps {
-                echo "🚀 Promoting DEV to TEST..."
+                echo "🚀 Promoting DEV to TEST on Docker Hub..."
                 bat """
                     docker pull %DOCKER_REPO%/%IMAGE_NAME%:dev
                     docker tag %DOCKER_REPO%/%IMAGE_NAME%:dev %DOCKER_REPO%/%IMAGE_NAME%:test
@@ -52,7 +63,7 @@ pipeline {
         stage('Promote Test to Prod') {
             when { branch 'main' }
             steps {
-                echo "🚀 Promoting TEST to PROD..."
+                echo "🚀 Promoting TEST to PROD on Docker Hub..."
                 bat """
                     docker pull %DOCKER_REPO%/%IMAGE_NAME%:test
                     docker tag %DOCKER_REPO%/%IMAGE_NAME%:test %DOCKER_REPO%/%IMAGE_NAME%:prod
@@ -74,7 +85,7 @@ pipeline {
 
                     bat """
                         docker rm -f ${containerName}
-                        docker run -d --name ${containerName} -p ${hostPort}:${CONTAINER_PORT} ${DOCKER_REPO}/${IMAGE_NAME}:${envTag}
+                        docker run -d --name ${containerName} -p ${hostPort}:${CONTAINER_PORT} %DOCKER_REPO%/%IMAGE_NAME%:${envTag}
                     """
                 }
             }
