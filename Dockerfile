@@ -17,5 +17,10 @@ COPY test/ test/
 # Expose the Flask port
 EXPOSE 8080
 
+RUN useradd -m appuser
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
 # Run the app
 CMD ["python", "app.py"]
